@@ -1,4 +1,4 @@
-import { Context, Request, Response } from "koa";
+import { Context } from "koa";
 
 interface Indexable {
   [key: string]: any;
