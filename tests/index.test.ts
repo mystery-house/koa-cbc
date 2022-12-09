@@ -149,7 +149,7 @@ describe("BaseController", () => {
 
   })
 
-  it("should call the `next` function, if set", async () => {
+  it("should call the 'next' function, if set", async () => {
 
     ctx.method = 'GET';
 
@@ -203,7 +203,6 @@ describe("BaseController", () => {
     expect(test._nextCalled).toBe(true);
     // ..It should still have been called exactly once
     expect(next).toHaveBeenCalledTimes(1);
-    console.log(ctx.body);
 
     expect(test.ctx.body).toEqual("Before\nAfter");
   })

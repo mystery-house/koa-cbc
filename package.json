@@ -1,12 +1,12 @@
 {
   "name": "koa-cbc",
-  "version": "1.0.0",
-  "description": "TypeScript class-based controllers for Koa 2",
+  "version": "0.1.0",
+  "description": "Class-based controllers for Koa 2",
   "main": "dist/index.js",
   "repository": "https://code.mysteryhouse.studio/andy/koa-cbc.git",
   "author": "Andy Chase <andychase@gmail.com>",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "build": "tsc",
     "test": "jest"
