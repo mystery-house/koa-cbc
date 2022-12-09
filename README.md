@@ -1,5 +1,10 @@
 # Class-based Controller Middleware for [Koa](https://koajs.com)
 
+## Note 
+2022-12-09: This does not actually work yet... somewhere between 'poc' and 'make all the tests green', something broke.
+
+-----
+
 If you're familiar with Django's [class-based views](https://docs.djangoproject.com/en/4.1/topics/class-based-views/) then `koa-cbc` should feel familiar. It lets you organize different HTTP operations related to a given resource into one class, which is often conceptually and organizationally helpful.
 
 ## TypeScript Example
