@@ -1,52 +1,152 @@
 import { Context, HttpError, Next } from "koa";
 interface Indexable {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
-export const HttpMethods = ["get", "post", "put", "patch", "delete", "head", "connect", "options", "trace"] as const
+export const HttpMethods = [
+  "get",
+  "post",
+  "put",
+  "patch",
+  "delete",
+  "head",
+  "connect",
+  "options",
+  "trace",
+] as const;
 
 /**
  * Valid HTTP methods
  */
-export type HttpMethod = typeof HttpMethods[number]
+export type HttpMethod = typeof HttpMethods[number];
 
-/** 
- * Valid HTTP status codes 
+/**
+ * Valid HTTP status codes
  */
-export type HttpStatusCode = 100 | 101 | 102 | 103 | 104 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209 | 226 | 227 | 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308 | 309 | 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 421 | 422 | 423 | 424 | 425 | 426 | 427 | 428 | 429 | 430 | 431 | 432 | 451 | 452 | 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 509 | 510 | 511
+export type HttpStatusCode =
+  | 100
+  | 101
+  | 102
+  | 103
+  | 104
+  | 200
+  | 201
+  | 202
+  | 203
+  | 204
+  | 205
+  | 206
+  | 207
+  | 208
+  | 209
+  | 226
+  | 227
+  | 300
+  | 301
+  | 302
+  | 303
+  | 304
+  | 305
+  | 306
+  | 307
+  | 308
+  | 309
+  | 400
+  | 401
+  | 402
+  | 403
+  | 404
+  | 405
+  | 406
+  | 407
+  | 408
+  | 409
+  | 410
+  | 411
+  | 412
+  | 413
+  | 414
+  | 415
+  | 416
+  | 417
+  | 418
+  | 419
+  | 421
+  | 422
+  | 423
+  | 424
+  | 425
+  | 426
+  | 427
+  | 428
+  | 429
+  | 430
+  | 431
+  | 432
+  | 451
+  | 452
+  | 500
+  | 501
+  | 502
+  | 503
+  | 504
+  | 505
+  | 506
+  | 507
+  | 508
+  | 509
+  | 510
+  | 511;
 
 /**
  * Describes the expected interface of a Controller class
  */
 interface BaseController {
   /** Handles HTTP GET requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get?(): Promise<any>;
+  /** Handles HTTP GET requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   post?(): Promise<any>;
+  /** Handles HTTP GET requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   put?(): Promise<any>;
+  /** Handles HTTP PUT requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   patch?(): Promise<any>;
+  /** Handles HTTP DELETE requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete?(): Promise<any>;
+  /** Handles HTTP HEAD requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   head?(): Promise<any>;
+  /** Handles HTTP CONNECT requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connect?(): Promise<any>;
+  /** Handles HTTP OPTIONS requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?(): Promise<any>;
+  /** Handles HTTP TRACE requests */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trace?(): Promise<any>;
 }
 
 /**
  * `BaseController` is an abstract base class that can be extended to handle
  * requests for a given resource, based on requests. The constructor takes a
- * Koa `Context` object and the `dispatch` method invokes the appropriate 
+ * Koa `Context` object and the `dispatch` method invokes the appropriate
  * class method indicated by the context's `request` object.
- * 
- * If a `next` function is passed to the constructor, it can be explicitly 
- * called internally by using the private `_next` method. Otherwise, it will
- * be called at the end of the `dispatch` method.
+ *
+ * If a `next` function is passed to the constructor, it can be explicitly
+ * called using the `next` method. Otherwise, it will be called at the end of the
+ * `dispatch` method.
  */
 abstract class BaseController {
-
   /** The Koa `Context` object  */
   ctx: Context;
   _next?: Next;
-  _nextCalled: boolean = false;
+  _nextCalled: boolean;
 
   constructor(ctx: Context, next?: Next) {
     if (this.constructor == BaseController) {
@@ -56,26 +156,30 @@ abstract class BaseController {
     }
     this.ctx = ctx;
     if (next) this._next = next;
+    this._nextCalled = false;
   }
 
   /**
    * Dispatches the controller method designated by the context request and sets the response
    * body accordingly.
-   * 
+   *
    * Because the most typical pattern is "call a method, send a response", methods return just the
    * body value, and any changes to the HTTP status code or headers are left up to the implementor.
-   * 
+   *
    * The default response status code is 200.
    */
   async dispatch() {
     const methodName = this.ctx.request.method.toLowerCase() as HttpMethod;
 
     if (HttpMethods.indexOf(methodName) === -1) {
-      this.ctx.throw(400, `Invalid request method: ${methodName.toUpperCase()}`)
+      this.ctx.throw(
+        400,
+        `Invalid request method: ${methodName.toUpperCase()}`
+      );
     }
 
     if (!(this as Indexable)[methodName]) {
-      this.ctx.throw(501, `${methodName.toUpperCase()} method not implemented`)
+      this.ctx.throw(501, `${methodName.toUpperCase()} method not implemented`);
     }
 
     try {
@@ -83,9 +187,10 @@ abstract class BaseController {
       // for making method names dynamically indexable. (https://stackoverflow.com/a/53194405)
       const body = await (this as Indexable)[methodName]();
       this.setResponseBody(body);
-      this.next();
-    }
-    catch (error) {
+      if (!this._nextCalled) {
+        this.next();
+      }
+    } catch (error) {
       let message = "An error occurred";
       let code = 500;
 
@@ -100,18 +205,25 @@ abstract class BaseController {
   }
 
   /**
-   * Invokes the middleware `next` function, if set.
+   * Invokes the middleware `next` function, if set and if it has not
+   * already been run elsewhere.
    */
   async next() {
-    if (this._next) {
+    if (this._next && !this._nextCalled) {
       await this._next();
       this._nextCalled = true;
+    } else if (this._next && this._nextCalled) {
+      if (this._nextCalled) {
+        console.warn(
+          "The 'next' function was called, but it has already been run."
+        );
+      }
     }
   }
 
   /**
    * Sets the response HTTP status code
-   * @param status_code 
+   * @param status_code
    */
   setResponseStatus(status_code: HttpStatusCode) {
     this.ctx.status = status_code;
@@ -119,7 +231,7 @@ abstract class BaseController {
 
   /**
    * Merges custom headers with any existing context response headers
-   * @param headers 
+   * @param headers
    */
   setResponseHeaders(headers: { [key: string]: string | string[] }) {
     const keys = Object.keys(headers);
@@ -131,23 +243,24 @@ abstract class BaseController {
   /**
    * Sets the response body.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setResponseBody(body: any) {
-    this.ctx.body = body
+    this.ctx.body = body;
   }
 
   /**
-   * Throws an error using the context object. 
-   * 
-   * Note that these are user-level errors, and the message 
+   * Throws an error using the context object.
+   *
+   * Note that these are user-level errors, and the message
    * may be exposed to the client.
-   * 
-   * @param status_code 
-   * @param message 
+   *
+   * @param status_code
+   * @param message
    */
   error(status_code: HttpStatusCode, message: string) {
     this.ctx.throw({
       code: status_code,
-      message: message
+      message: message,
     });
   }
 }
