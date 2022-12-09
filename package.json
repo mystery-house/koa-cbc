@@ -1,9 +1,9 @@
 {
   "name": "koa-cbc",
-  "version": "0.1.0",
+  "version": "0.1.0-unstable",
   "description": "Class-based controllers for Koa 2",
   "main": "dist/index.js",
-  "repository": "https://code.mysteryhouse.studio/andy/koa-cbc.git",
+  "repository": "https://github.com/mystery-house/koa-cbc.git",
   "author": "Andy Chase <andychase@gmail.com>",
   "license": "MIT",
   "private": false,

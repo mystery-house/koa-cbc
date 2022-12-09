@@ -60,6 +60,22 @@ yarn add -D @types/koa
 npm install --save-dev @types/koa
 ```
 
+## Development
+
+```bash
+# Clone the repository:
+git clone https://github.com/mystery-house/koa-cbc.git
+
+# Install dependencies
+yarn install
+
+# Run tests
+yarn test
+
+# Build
+yarn build
+```
+
 ## Caveat
 
-This project has not been heavily used yet and will probably undergo multiple changes on its way to a 1.0 release.
+This project has not been heavily used yet and will likely undergo multiple changes on its way to a stable release.
