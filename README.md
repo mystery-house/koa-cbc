@@ -39,10 +39,10 @@ The single instance of `UserController` will handle both `GET` and `POST` reques
 
 ```Bash
 # yarn
-yarn install koa-cdc
+yarn add koa-cdc
 
 # npm
-npm add koa-cdc
+npm install koa-cdc
 ```
 
 ## TypeScript
@@ -67,6 +67,7 @@ npm install --save-dev @types/koa
 git clone https://github.com/mystery-house/koa-cbc.git
 
 # Install dependencies
+cd koa-cbc
 yarn install
 
 # Run tests
