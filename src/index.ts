@@ -4,7 +4,7 @@ interface Indexable {
   [key: string]: any;
 }
 
-export const HttpMethods = [
+export const HttpVerbs = [
   "get",
   "post",
   "put",
@@ -19,7 +19,7 @@ export const HttpMethods = [
 /**
  * Valid HTTP methods
  */
-export type HttpMethod = typeof HttpMethods[number];
+export type HttpVerb = typeof HttpVerbs[number];
 
 /**
  * Valid HTTP status codes
@@ -101,57 +101,66 @@ export type HttpStatusCode =
 
 /**
  * Describes the expected interface of a Controller class
+ * 
+ * @TODO there's probably a clever way to declare the HTTP Verb methods with a single line from the `HttpVerb` type, but [K in HttpVerb] isn't it
  */
-interface BaseController {
+interface BaseCtl {
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get?(): Promise<any>;
+  get?(ctx: Context): Promise<any>;
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  post?(): Promise<any>;
+  post?(ctx: Context): Promise<any>;
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  put?(): Promise<any>;
+  put?(ctx: Context): Promise<any>;
   /** Handles HTTP PUT requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  patch?(): Promise<any>;
+  patch?(ctx: Context): Promise<any>;
   /** Handles HTTP DELETE requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete?(): Promise<any>;
+  delete?(ctx: Context): Promise<any>;
   /** Handles HTTP HEAD requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  head?(): Promise<any>;
+  head?(ctx: Context): Promise<any>;
   /** Handles HTTP CONNECT requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connect?(): Promise<any>;
+  connect?(ctx: Context): Promise<any>;
   /** Handles HTTP OPTIONS requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options?(): Promise<any>;
+  options?(ctx: Context): Promise<any>;
   /** Handles HTTP TRACE requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trace?(): Promise<any>;
+  trace?(ctx: Context): Promise<any>;
 }
 
 /**
- * `BaseController` is an abstract base class that can be extended to handle
+ * `BaseCtl` is an abstract base class that can be extended to handle
  * requests for a given resource, based on requests. The constructor takes a
  * Koa `Context` object and the `dispatch` method invokes the appropriate
  * class method indicated by the context's `request` object.
  *
  * If a `next` function is passed to the constructor, it can be explicitly
- * called using the `next` method. Otherwise, it will be called at the end of the
- * `dispatch` method.
+ * called anywhere using the `next` method. Otherwise, it will be called
+ * at the end of the `dispatch` method.
+ *
+ * *While not _technically_ abstract (to accommodate its static methods),
+ * `BaseCtl` will throw an error if you try to instantiate it directly.
  */
-abstract class BaseController {
+class BaseCtl {
   /** The Koa `Context` object  */
   ctx: Context;
+  /** The Koa middleware `next` callback */
   _next?: Next;
+  /** Keeps track of whether or not the `next` function has been called */
   _nextCalled: boolean;
+  /** Stores a singleton instance of the Controller class */
+  static _ctl: BaseCtl | undefined;
 
   constructor(ctx: Context, next?: Next) {
-    if (this.constructor == BaseController) {
+    if (this.constructor == BaseCtl) {
       throw new Error(
-        "Controller is an abstract class and should not be instantiated."
+        "BaseCtl is an abstract class and should not be instantiated."
       );
     }
     this.ctx = ctx;
@@ -167,11 +176,15 @@ abstract class BaseController {
    * body value, and any changes to the HTTP status code or headers are left up to the implementor.
    *
    * The default response status code is 200.
+   *
+   * @TODO might be nice to have an option to automagically parse POST request bodies without
+   * needing to explicitly add `koa-bodyparse` to the middleware chain
+   * (invoke koa-bodyparse directly inside dispatch()? Probably frowned upon)
    */
   async dispatch() {
-    const methodName = this.ctx.request.method.toLowerCase() as HttpMethod;
+    const methodName = this.ctx.request.method.toLowerCase() as HttpVerb;
 
-    if (HttpMethods.indexOf(methodName) === -1) {
+    if (HttpVerbs.indexOf(methodName) === -1) {
       this.ctx.throw(
         400,
         `Invalid request method: ${methodName.toUpperCase()}`
@@ -185,7 +198,7 @@ abstract class BaseController {
     try {
       // Hat-tip to Daniel W Strimpel for this solution
       // for making method names dynamically indexable. (https://stackoverflow.com/a/53194405)
-      const body = await (this as Indexable)[methodName]();
+      const body = await (this as Indexable)[methodName](this.ctx);
       this.setResponseBody(body);
       if (!this._nextCalled) {
         this.next();
@@ -205,8 +218,7 @@ abstract class BaseController {
   }
 
   /**
-   * Invokes the middleware `next` function, if set and if it has not
-   * already been run elsewhere.
+   * Invokes the middleware `next` function, if it's set (and if it has not already been run elsewhere.)
    */
   async next() {
     if (this._next && !this._nextCalled) {
@@ -219,6 +231,50 @@ abstract class BaseController {
         );
       }
     }
+  }
+
+  /**
+   * The `go` method returns a Koa middleware function that is the main entry point into the controller.
+   *
+   * It can be invoked directly within the Koa `use()` method.
+   *
+   * If you're familiar with Django, `go`() is like [`as_view()`](https://docs.djangoproject.com/en/4.1/ref/class-based-views/base/#django.views.generic.base.View.as_view).
+   */
+  static go() {
+    return async (ctx: Context, next?: Next) => {
+      const ctl = this.setup(ctx, next);
+      await ctl.dispatch();
+    };
+  }
+
+  /**
+   * `setup` is a static helper function that instantiates and/or
+   * returns a singleton Controller object.
+   */
+  static setup(ctx: Context, next?: Next): BaseCtl {
+    let ctl: BaseCtl | undefined = this.ctl;
+
+    if (ctl instanceof this) {
+      /* noop */
+    } else {
+      ctl = new this(ctx, next);
+      this.ctl = ctl;
+    }
+    return ctl;
+  }
+
+  /**
+   * Static getter for the ctl property.
+   */
+  static get ctl(): BaseCtl | undefined {
+    return this._ctl;
+  }
+
+  /**
+   * Static setter for the ctl property.
+   */
+  static set ctl(ctl: BaseCtl | undefined) {
+    this._ctl = ctl;
   }
 
   /**
@@ -265,4 +321,4 @@ abstract class BaseController {
   }
 }
 
-export default BaseController;
+export default BaseCtl;

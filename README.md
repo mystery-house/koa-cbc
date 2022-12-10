@@ -13,9 +13,10 @@ If you're familiar with Django's [class-based views](https://docs.djangoproject.
 
 ```TypeScript
 import Koa, {Context, Next} from "koa";
-import BaseController from "koa-cdc";
+import bodyParser from "koa-bodyparser";
+import BaseCtl from "koa-cdc";
 
-class UserContoller extends BaseController {
+class FooCtl extends BaseCtl {
   constructor(ctx: Controller, next?: Next ) {
     super(ctx, next);
   }
@@ -23,22 +24,30 @@ class UserContoller extends BaseController {
   async get() {
     const userId = this.ctx.request.query.id;
     // [...look up user...]
-    return user;
+    if (this.ctx.request.query.foo.toLowerCase() == 'foo') {
+      return "bar";
+    }
+    else {
+      return "No bar for you";
+    }
   }
 
   async post() {
-    const userData = this.ctx.request.body
-    // [...create a new user...]
-    return user;
+    // (POST request data will have been parsed by koa-bodyparser)
+    if (this.ctx.request.body.bar.toLowerCase() == 'bar') {
+      return "bat";
+    }
+    else {
+      return "no bat for you";
+    }
   }
 }
 
 const app = new Koa();
-app.use((ctx, next) => {new UserController.dispatch(ctx, next)})
-.listen(3000);
+app.use(bodyParser());
+app.use(FooCtl.go())
+app.listen(3000);
 ```
-
-The single instance of `UserController` will handle both `GET` and `POST` requests.
 
 ## Installation
 
