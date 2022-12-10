@@ -154,8 +154,6 @@ class BaseCtl {
   _next?: Next;
   /** Keeps track of whether or not the `next` function has been called */
   _nextCalled: boolean;
-  /** Stores a singleton instance of the Controller class */
-  static _ctl: BaseCtl | undefined;
 
   constructor(ctx: Context, next?: Next) {
     if (this.constructor == BaseCtl) {
@@ -242,40 +240,11 @@ class BaseCtl {
    */
   static go() {
     return async (ctx: Context, next?: Next) => {
-      const ctl = this.setup(ctx, next);
+      const ctl = new this(ctx, next);
       await ctl.dispatch();
     };
   }
 
-  /**
-   * `setup` is a static helper function that instantiates and/or
-   * returns a singleton Controller object.
-   */
-  static setup(ctx: Context, next?: Next): BaseCtl {
-    let ctl: BaseCtl | undefined = this.ctl;
-
-    if (ctl instanceof this) {
-      /* noop */
-    } else {
-      ctl = new this(ctx, next);
-      this.ctl = ctl;
-    }
-    return ctl;
-  }
-
-  /**
-   * Static getter for the ctl property.
-   */
-  static get ctl(): BaseCtl | undefined {
-    return this._ctl;
-  }
-
-  /**
-   * Static setter for the ctl property.
-   */
-  static set ctl(ctl: BaseCtl | undefined) {
-    this._ctl = ctl;
-  }
 
   /**
    * Sets the response HTTP status code

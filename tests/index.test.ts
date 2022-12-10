@@ -236,20 +236,6 @@ describe("BaseCtl", () => {
     // @TODO pass GoTest.go() to koa.use() and assert the args it was called with
   });
 
-  it("should call the 'setup' method from the middleware function returned by the 'go' method", async () => {
-    ctx.method = "GET";
-
-    class SetupTest extends BaseCtl {
-      async get(ctx: Context) {
-        return "OK";
-      }
-    }
-
-    const setupMock = jest.spyOn(SetupTest, "setup");
-    await SetupTest.go()(ctx);
-    expect(setupMock).toHaveBeenCalled();
-  });
-
   it("should call the 'dispatch' method from the middleware function returned by the 'go' method", async () => {
     ctx.method = "GET";
 
@@ -264,14 +250,4 @@ describe("BaseCtl", () => {
     expect(dispatchMock).toHaveBeenCalled();
   });
 
-  it("should always return the same instance of the controller class from the 'setup' method", () => {
-    class SingletonTest extends BaseCtl {}
-
-    const s1 = SingletonTest.setup(ctx);
-    const s2 = SingletonTest.setup(ctx);
-    const s3 = SingletonTest.setup(ctx);
-
-    expect(s1).toEqual(s2);
-    expect(s1).toEqual(s3);
-  });
 });
