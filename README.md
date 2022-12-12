@@ -1,30 +1,28 @@
 # Class-based Controller Middleware for [Koa](https://koajs.com)
 
-## Note 
-2022-12-09: This does not actually work yet... somewhere between 'poc' and 'make all the tests green', something broke.
-
 -----
 
-If you're familiar with Django's [class-based views](https://docs.djangoproject.com/en/4.1/topics/class-based-views/) then `koa-cbc` should feel familiar. It lets you organize different HTTP operations related to a given resource into one class, which is often conceptually and organizationally helpful.
+koa-ctl lets you collect HTTP methods related to a single resource into one class, which is often conceptually and organizationally helpful.
+
+If you're familiar with Django's [class-based views](https://docs.djangoproject.com/en/4.1/topics/class-based-views/) then `koa-ctl` should feel familiar!
 
 ## TypeScript Example
 
-(With @types/koa installed)
+(With koa-router, koa-bodyparser, @types/koa, @types/koa-bodyparser and @types/koa-router installed)
 
 ```TypeScript
 import Koa, {Context, Next} from "koa";
 import bodyParser from "koa-bodyparser";
-import BaseCtl from "koa-cdc";
+import router from "koa-router";
+import BaseCtl from "koa-ctl";
 
 class FooCtl extends BaseCtl {
   constructor(ctx: Controller, next?: Next ) {
     super(ctx, next);
   }
 
-  async get() {
-    const userId = this.ctx.request.query.id;
-    // [...look up user...]
-    if (this.ctx.request.query.foo.toLowerCase() == 'foo') {
+  async get(ctx: Context, next?: Next) {
+    if (ctx.request.query.foo.toLowerCase() == 'foo') {
       return "bar";
     }
     else {
@@ -32,9 +30,9 @@ class FooCtl extends BaseCtl {
     }
   }
 
-  async post() {
+  async post(ctx: Context, next?: Next) {
     // (POST request data will have been parsed by koa-bodyparser)
-    if (this.ctx.request.body.bar.toLowerCase() == 'bar') {
+    if (ctx.request.body.bar.toLowerCase() == 'bar') {
       return "bat";
     }
     else {
@@ -45,7 +43,7 @@ class FooCtl extends BaseCtl {
 
 const app = new Koa();
 app.use(bodyParser());
-app.use(FooCtl.go())
+app.use(route.all("/foo", FooCtl.go()));
 app.listen(3000);
 ```
 
@@ -78,10 +76,10 @@ npm install --save-dev @types/koa
 
 ```bash
 # Clone the repository:
-git clone https://github.com/mystery-house/koa-cbc.git
+git clone https://github.com/mystery-house/koa-ctl.git
 
 # Install dependencies
-cd koa-cbc
+cd koa-ctl
 yarn install
 
 # Run tests

@@ -107,31 +107,31 @@ export type HttpStatusCode =
 interface BaseCtl {
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get?(ctx: Context): Promise<any>;
+  get?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  post?(ctx: Context): Promise<any>;
+  post?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP GET requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  put?(ctx: Context): Promise<any>;
+  put?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP PUT requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  patch?(ctx: Context): Promise<any>;
+  patch?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP DELETE requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete?(ctx: Context): Promise<any>;
+  delete?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP HEAD requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  head?(ctx: Context): Promise<any>;
+  head?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP CONNECT requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connect?(ctx: Context): Promise<any>;
+  connect?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP OPTIONS requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options?(ctx: Context): Promise<any>;
+  options?(ctx: Context, next?: Next): Promise<any>;
   /** Handles HTTP TRACE requests */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trace?(ctx: Context): Promise<any>;
+  trace?(ctx: Context, next?: Next): Promise<any>;
 }
 
 /**
@@ -168,12 +168,19 @@ class BaseCtl {
 
   /**
    * Dispatches the controller method designated by the context request and sets the response
-   * body accordingly.
+   * body accordingly. The `ctx` and `next` properties are passed directly to the method as a
+   * convenience. (In this case the `next` property is actually a wrapper which ensures that
+   * `next` only gets called once.)  If `next` exists and you do not explicitly invoke it in your
+   * method(s), it will be called automatically before `dispatch` returns.
    *
-   * Because the most typical pattern is "call a method, send a response", methods return just the
-   * body value, and any changes to the HTTP status code or headers are left up to the implementor.
+   * Because the typical controller pattern is "call a method, send a response", methods can just 
+   * return a value instead of modifying properties on the `ctx` argument; `dispatch` takes care
+   * of that for you. If you need to update the response status or headers, use the `setResponseStatus()`
+   * and `setResponseHeaders()` methods.
    *
    * The default response status code is 200.
+   * 
+   * 
    *
    * @TODO might be nice to have an option to automagically parse POST request bodies without
    * needing to explicitly add `koa-bodyparse` to the middleware chain
@@ -196,7 +203,7 @@ class BaseCtl {
     try {
       // Hat-tip to Daniel W Strimpel for this solution
       // for making method names dynamically indexable. (https://stackoverflow.com/a/53194405)
-      const body = await (this as Indexable)[methodName](this.ctx);
+      const body = await (this as Indexable)[methodName](this.ctx, () => this.next());
       this.setResponseBody(body);
       if (!this._nextCalled) {
         this.next();

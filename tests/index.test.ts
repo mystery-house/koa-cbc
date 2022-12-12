@@ -175,8 +175,8 @@ describe("BaseCtl", () => {
         super(ctx, next);
       }
 
-      async get(ctx: Context) {
-        await this.next();
+      async get(ctx: Context, next: Next) {
+        await next();
         return ctx.body + "After";
       }
     }
@@ -207,9 +207,9 @@ describe("BaseCtl", () => {
         super(ctx, next);
       }
 
-      async get(ctx: Context) {
-        await this.next();
-        await this.next();
+      async get(ctx: Context, next: Next) {
+        await next();
+        await next();
         return ctx.body + "After";
       }
     }
@@ -230,7 +230,7 @@ describe("BaseCtl", () => {
   });
 
   it("should return a Koa middleware function when the static `go` method is called.", () => {
-    class GoTest extends BaseCtl {}
+    class GoTest extends BaseCtl { }
 
     expect(typeof GoTest.go()).toEqual("function");
     // @TODO pass GoTest.go() to koa.use() and assert the args it was called with
