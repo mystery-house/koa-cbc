@@ -6,7 +6,10 @@ const config: Config.InitialOptions = {
   verbose: true,
   automock: false,
   testPathIgnorePatterns: [
-    "tests/helpers/*"
+    "<rootDir>/tests/helpers/"
+  ],
+  coveragePathIgnorePatterns: [
+    "<rootDir>/tests/helpers/"
   ]
 }
 export default config

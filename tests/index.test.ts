@@ -93,7 +93,7 @@ describe("BaseCtl", () => {
       constructor(ctx: Context) {
         super(ctx);
       }
-      async get(ctx: Context) {
+      async get(ctx: Context, next?: Next) {
         return { foo: "bar" };
       }
     }
@@ -148,7 +148,7 @@ describe("BaseCtl", () => {
         super(ctx, next);
       }
 
-      async get(ctx: Context) {
+      async get(ctx: Context, next?: Next) {
         return "A box of biscuits, box of mixed biscuits, a box of biscuits mixed.";
       }
     }
@@ -175,8 +175,10 @@ describe("BaseCtl", () => {
         super(ctx, next);
       }
 
-      async get(ctx: Context, next: Next) {
-        await next();
+      async get(ctx: Context, next?: Next) {
+        if (next) {
+          await next();
+        }
         return ctx.body + "After";
       }
     }
@@ -207,9 +209,12 @@ describe("BaseCtl", () => {
         super(ctx, next);
       }
 
-      async get(ctx: Context, next: Next) {
-        await next();
-        await next();
+      async get(ctx: Context, next?: Next) {
+
+        if(next) {
+          await next();
+          await next();
+        }
         return ctx.body + "After";
       }
     }
@@ -240,7 +245,7 @@ describe("BaseCtl", () => {
     ctx.method = "GET";
 
     class DispatchTest extends BaseCtl {
-      async get(ctx: Context) {
+      async get(ctx: Context, next?: Next) {
         return "OK";
       }
     }

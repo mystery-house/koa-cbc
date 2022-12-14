@@ -179,12 +179,6 @@ class BaseCtl {
    * and `setResponseHeaders()` methods.
    *
    * The default response status code is 200.
-   * 
-   * 
-   *
-   * @TODO might be nice to have an option to automagically parse POST request bodies without
-   * needing to explicitly add `koa-bodyparse` to the middleware chain
-   * (invoke koa-bodyparse directly inside dispatch()? Probably frowned upon)
    */
   async dispatch() {
     const methodName = this.ctx.request.method.toLowerCase() as HttpVerb;
@@ -224,6 +218,8 @@ class BaseCtl {
 
   /**
    * Invokes the middleware `next` function, if it's set (and if it has not already been run elsewhere.)
+   * 
+   * @TODO streamline multiple if/else/return logic
    */
   async next() {
     if (this._next && !this._nextCalled) {
