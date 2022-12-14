@@ -1,19 +1,17 @@
-# Class-based Controller Middleware for [Koa](https://koajs.com)
+# koa-ctl
 
------
+## Class-based Controller Middleware for [Koa](https://koajs.com)
 
-koa-ctl lets you collect HTTP methods related to a single resource into one class, which is often conceptually and organizationally helpful.
+koa-ctl lets you organize handlers for multiple types of HTTP requests into one class, which is often conceptually and organizationally helpful when you need to handle different operations on the same type of resource.
 
-If you're familiar with Django's [class-based views](https://docs.djangoproject.com/en/4.1/topics/class-based-views/) then `koa-ctl` should feel familiar!
+If you're familiar with Django's [class-based views](https://docs.djangoproject.com/en/4.1/topics/class-based-views/) then `koa-ctl` should feel familiar.
 
 ## TypeScript Example
-
-(With koa-router, koa-bodyparser, @types/koa, @types/koa-bodyparser and @types/koa-router installed)
 
 ```TypeScript
 import Koa, {Context, Next} from "koa";
 import bodyParser from "koa-bodyparser";
-import router from "koa-router";
+import Router from "koa-router";
 import BaseCtl from "koa-ctl";
 
 class FooCtl extends BaseCtl {
@@ -42,8 +40,12 @@ class FooCtl extends BaseCtl {
 }
 
 const app = new Koa();
+const router = new Router();
+router.all('/foo') => FooCtl.go()
+
 app.use(bodyParser());
-app.use(route.all("/foo", FooCtl.go()));
+app.use(router.routes())
+app.use(router.allowedMethods())
 app.listen(3000);
 ```
 
@@ -51,15 +53,15 @@ app.listen(3000);
 
 ```Bash
 # yarn
-yarn add koa-cdc
+yarn add koa-ctl
 
 # npm
-npm install koa-cdc
+npm install koa-ctl
 ```
 
 ## TypeScript
 
-`koa-cdc` is written in TypeScript from the ground up and includes its own type definitions.
+`koa-ctl` is written in TypeScript from the ground up and includes its own type definitions.
 
 ## Dependencies
 
