@@ -1,6 +1,6 @@
 {
   "name": "koa-ctl",
-  "version": "0.2.0",
+  "version": "0.2.1-unstable",
   "description": "Class-based controllers for Koa 2",
   "main": "dist/index.js",
   "repository": "https://github.com/mystery-house/koa-ctl.git",
