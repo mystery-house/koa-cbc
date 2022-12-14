@@ -1,6 +1,6 @@
 {
   "name": "koa-ctl",
-  "version": "0.2.1-unstable",
+  "version": "0.2.2-unstable",
   "description": "Class-based controllers for Koa 2",
   "main": "dist/index.js",
   "repository": "https://github.com/mystery-house/koa-ctl.git",
@@ -26,5 +26,9 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
+  },
+  "keywords": ["koa", "controller", "mvc"],
+  "bugs": {
+    "url": "https://github.com/mystery-house/koa-ctl/issues"
   }
 }
