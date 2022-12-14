@@ -41,7 +41,7 @@ class FooCtl extends BaseCtl {
 
 const app = new Koa();
 const router = new Router();
-router.all('/foo') => FooCtl.go()
+router.all('/foo', FooCtl.go());
 
 app.use(bodyParser());
 app.use(router.routes())
